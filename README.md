@@ -4,8 +4,17 @@ A Django + React prototype for ingesting, normalizing, and reviewing emissions d
 
 ## Live Demo
 
-**App**: [deployed URL]  
+**App**: https://breathe-esg-taupe.vercel.app  
 **Login**: `analyst` / `demo1234`
+
+> **Note on cold starts**: The backend is hosted on Render's free tier. If the app shows a loading delay on first visit (up to 60 seconds), this is expected — Render spins down free services after inactivity. Subsequent requests are fast. In production this would run on a paid instance with zero cold start.
+
+## Deployment
+
+| Layer | Platform | URL |
+|-------|----------|-----|
+| Frontend | Vercel | https://breathe-esg-taupe.vercel.app |
+| Backend API | Render (free tier) | https://breathe-esg-backend-ttlw.onrender.com |
 
 ## Local Setup
 
@@ -24,12 +33,10 @@ python manage.py runserver
 ```bash
 cd frontend
 npm install
-# For local dev (proxies /api to localhost:8000):
 npm run dev
-
-# For production build:
-VITE_API_URL=https://your-backend.com npm run build
 ```
+
+Open `http://localhost:5173` — login: `analyst` / `demo1234`
 
 ## Architecture
 
@@ -95,3 +102,19 @@ Key design points:
 - **Flights**: DEFRA 2024 aviation factors (includes RFI 1.891 multiplier)
 - **Hotels**: HCMI 2023 regional averages
 - **Ground transport**: DEFRA 2024 road transport factors
+
+## Known Limitations (Free Tier)
+
+### Render free tier constraints
+- **Cold starts**: Service spins down after 15 minutes of inactivity. First request after inactivity takes 30-60 seconds to wake up. This is a Render free tier limitation, not an application issue.
+- **SQLite resets on redeploy**: Every redeploy resets the database and re-runs `seed_demo`. In production this would use PostgreSQL (Render provides managed Postgres).
+- **Ephemeral storage**: Uploaded files are lost on redeploy since free tier has no persistent disk. Production would use S3 or similar object storage.
+- **Single worker**: Free tier runs one gunicorn worker. Concurrent requests queue. Production would run 2-4 workers minimum.
+
+### What would change in production
+- PostgreSQL instead of SQLite
+- S3 for raw file storage
+- Paid Render instance (no cold starts, persistent disk)
+- Proper secret management via environment vault
+- Role-based access control (Analyst / Manager / Auditor)
+- Two-person approval workflow before audit lock
