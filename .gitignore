@@ -29,3 +29,6 @@ dist/
 # OS
 .DS_Store
 Thumbs.db
+
+echo ".env" >> .gitignore
+echo ".env.example" >> .gitignore
